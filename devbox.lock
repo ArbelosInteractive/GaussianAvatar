@@ -5,6 +5,90 @@
       "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11?narHash=sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg%2FN38%3D#cudaPackages_11_8.cudatoolkit",
       "source": "nixpkg"
     },
+    "gcc@11": {
+      "last_modified": "2025-03-11T17:52:14Z",
+      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#gcc11",
+      "source": "devbox-search",
+      "version": "11.5.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/q627ll60rw9ljnh8lk7dfhkc7azdxfsg-gcc-wrapper-11.5.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/lazwfz6krz5fvkb8rj6n110y2q1nwkdr-gcc-wrapper-11.5.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/isqy81p52jwhpwsi6szhyfyxs2whxwsn-gcc-wrapper-11.5.0-info"
+            }
+          ],
+          "store_path": "/nix/store/q627ll60rw9ljnh8lk7dfhkc7azdxfsg-gcc-wrapper-11.5.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8kjkhqmmhviii26f73pfj5symhyawbq4-gcc-wrapper-11.5.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/8wiw8yvb1mxzpfphx52rblrjlwswypnj-gcc-wrapper-11.5.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/shv9y2bywh32gjlrsb8icxyr66ybf3b5-gcc-wrapper-11.5.0-info"
+            }
+          ],
+          "store_path": "/nix/store/8kjkhqmmhviii26f73pfj5symhyawbq4-gcc-wrapper-11.5.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kqflnhg7ifrxvfbras6lg5zb9xsw5ak4-gcc-wrapper-11.5.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/zd5plrjdmmnwnfin7nwcggkb4i1m59bp-gcc-wrapper-11.5.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/c29rcg1ds1pjh8ir9i5qy1m3l6ixdmym-gcc-wrapper-11.5.0-info"
+            }
+          ],
+          "store_path": "/nix/store/kqflnhg7ifrxvfbras6lg5zb9xsw5ak4-gcc-wrapper-11.5.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/b2zayyrnp9ngsbjdbcig3hh4xdv9xqij-gcc-wrapper-11.5.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/x70hlaifvjrf0lkypxlndzml368bf1d1-gcc-wrapper-11.5.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/wmq1cp5wy6dfnifbzmywyf031x5wjp95-gcc-wrapper-11.5.0-info"
+            }
+          ],
+          "store_path": "/nix/store/b2zayyrnp9ngsbjdbcig3hh4xdv9xqij-gcc-wrapper-11.5.0"
+        }
+      }
+    },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
       "last_modified": "2025-04-13T09:22:33Z",
       "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11?lastModified=1744536153&narHash=sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg%2FN38%3D"
