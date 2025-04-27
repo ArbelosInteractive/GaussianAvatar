@@ -1,0 +1,11 @@
+__pycache__
+gs_data/
+arguments/
+
+assets/uv_masks/
+assets/smpl_files/
+assets/bary_coords_uv_map/
+assets/*.npy
+assets/*.obj
+
+/pretrained_models/
