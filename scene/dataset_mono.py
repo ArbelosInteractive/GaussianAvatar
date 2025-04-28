@@ -104,6 +104,8 @@ class MonoDataset_train(Dataset):
         self.dataset_parms = dataset_parms
 
         self.data_folder = join(dataset_parms.source_path, 'train')
+        print(self.data_folder)
+ 
         self.device = device
         self.gender = self.dataset_parms.smpl_gender
 

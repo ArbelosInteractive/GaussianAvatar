@@ -30,14 +30,15 @@ def render_batch(points, shs, colors_precomp, rotations, scales, opacity, FovX, 
         sh_degree=active_sh_degree,
         campos=camera_center,
         prefiltered=False,
-        debug=False
+        debug=False,
+        antialiasing=False
     )
 
     rasterizer = GaussianRasterizer(raster_settings=raster_settings)
     cov3D_precomp = None
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, _ = rasterizer(
+    rendered_image, _, _ = rasterizer(
         means3D = points,
         means2D = screenspace_points,
         shs = shs,
