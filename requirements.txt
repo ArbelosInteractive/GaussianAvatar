@@ -1,12 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cu118
-
-wheel
-torch==2.0.1+cu118
-torchvision==0.15.2+cu118
-torchaudio==2.0.2
 
 
-tqdm
-tensorboard
-scipy
-opencv-python
+submodules/diff-gaussian-rasterization
+submodules/simple-knn
+pytorch3d @ git+https://github.com/facebookresearch/pytorch3d.git@v0.7.1

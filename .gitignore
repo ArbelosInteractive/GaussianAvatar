@@ -9,3 +9,5 @@ assets/*.npy
 assets/*.obj
 
 /pretrained_models/
+
+output
