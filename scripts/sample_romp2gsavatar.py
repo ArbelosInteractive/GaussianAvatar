@@ -47,8 +47,8 @@ def load_smpl_param(path, data_list, return_thata=True):
 # test_list = 446:647:4]
 snap = False
 
-data_folder = '/mnt/disk/data/Mono/data/'
-subject = 'snap_male3casual'
+data_folder = '/home/sethclim/coding/GaussianAvatar/data/'
+subject = 'arbelos'
 
 all_image_path = join(data_folder, subject, 'images')
 all_mask_apth = join(data_folder, subject, 'masks')

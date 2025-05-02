@@ -181,7 +181,7 @@ def main(root, gender, keypoints_threshold, use_silhouette, downscale=1):
             tensor = torch.from_numpy(v).clone().to(DEVICE)
             params[k] = nn.Parameter(tensor)
 
-    body_model = smplx.SMPL("./data/SMPLX/smpl", gender=gender)
+    body_model = smplx.SMPL("../../data/SMPLX/smpl", gender=gender)
     body_model.to(DEVICE)
 
     # optimize with keypoints

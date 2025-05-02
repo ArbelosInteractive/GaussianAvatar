@@ -5,7 +5,7 @@ import glob
 import os
 
 
-CHECKPOINT = os.path.expanduser("~/third_party/segment-anything/ckpts/sam_vit_h_4b8939.pth")
+CHECKPOINT = os.path.expanduser("~/coding/segment-anything/ckpts/sam_vit_h_4b8939.pth")
 MODEL = "vit_h"
 
 
@@ -24,6 +24,8 @@ if __name__ == "__main__":
     keypoints = np.load(f"{root}/keypoints.npy")
     os.makedirs(f"{root}/masks_sam", exist_ok=True)
     os.makedirs(f"{root}/masks_sam_images", exist_ok=True)
+
+    print(f"img_lists {len(img_lists)} keypoints {len(keypoints)}")
     for fn, pts in zip(img_lists, keypoints):
         img = cv2.imread(fn)
         predictor.set_image(img)
