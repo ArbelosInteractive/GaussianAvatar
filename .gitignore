@@ -7,7 +7,14 @@ assets/smpl_files/
 assets/bary_coords_uv_map/
 assets/*.npy
 assets/*.obj
+assets/*/*.obj
+assets/*/*.npy
+assets/*/*.npz
+assets/*/*.pth
 
 /pretrained_models/
 
 output
+
+/data/
+/scripts/custom/venv
