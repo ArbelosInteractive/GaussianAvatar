@@ -19,7 +19,7 @@ class Render:
             glutInitDisplayMode(self.display_mode)
             glutInitWindowSize(self.width, self.height)
             glutInitWindowPosition(0, 0)
-            _glut_window = glutCreateWindow("My Render.")
+            _glut_window = glutCreateWindow("My Render.".encode('utf-8'))
 
             # glEnable(GL_DEPTH_CLAMP)
             glEnable(GL_DEPTH_TEST)
