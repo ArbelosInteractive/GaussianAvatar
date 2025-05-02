@@ -33,5 +33,5 @@ cd $OPENPOSE_PATH
   --model_pose BODY_25
 cd $CURRENT_DIR
 
-python ./scripts/custom/convert_openpose_json_to_npy.py -json_dir $IMAGE_FOLDER/../openpose_json/
+python3 ./convert_openpose_json_to_npy.py --json_dir $IMAGE_FOLDER/../openpose_json/
 
