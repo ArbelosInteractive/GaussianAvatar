@@ -11,7 +11,66 @@ from submodules  import smplx
 from scipy.spatial.transform import Rotation as R
 import trimesh
 from utils.general_utils import load_masks, load_barycentric_coords, gen_lbs_weight_from_ori
-from arguments import smplx_cpose_param, smpl_cpose_param
+# from arguments import smplx_cpose_param, smpl_cpose_param
+
+import math
+
+
+# Function to convert Euler angles to rotation matrix
+def euler_to_matrix(euler_angles, order='XYZ'):
+    # Convert degrees to radians
+    euler_angles = np.radians(euler_angles)
+    
+    # Extract individual angles
+    roll, pitch, yaw = euler_angles
+    
+    # Rotation matrices for each axis
+    R_x = np.array([[1, 0, 0],
+                    [0, np.cos(roll), -np.sin(roll)],
+                    [0, np.sin(roll), np.cos(roll)]])
+    
+    R_y = np.array([[np.cos(pitch), 0, np.sin(pitch)],
+                    [0, 1, 0],
+                    [-np.sin(pitch), 0, np.cos(pitch)]])
+    
+    R_z = np.array([[np.cos(yaw), -np.sin(yaw), 0],
+                    [np.sin(yaw), np.cos(yaw), 0],
+                    [0, 0, 1]])
+    
+    # Combine the rotation matrices based on the order
+    if order == 'XYZ':
+        return np.dot(R_z, np.dot(R_y, R_x))
+    elif order == 'ZYX':
+        return np.dot(R_x, np.dot(R_y, R_z))
+    # Add other orders if needed (e.g., 'XZY', 'YXZ', etc.)
+    return None
+
+# Function to convert rotation matrix to axis-angle
+def matrix_to_axis_angle(R):
+    angle = np.arccos((np.trace(R) - 1) / 2)
+    
+    # If angle is close to zero, the axis is arbitrary (we return a zero vector)
+    if angle < 1e-6:
+        axis = np.zeros(3)
+    else:
+        axis = np.array([(R[2, 1] - R[1, 2]) / (2 * np.sin(angle)),
+                         (R[0, 2] - R[2, 0]) / (2 * np.sin(angle)),
+                         (R[1, 0] - R[0, 1]) / (2 * np.sin(angle))])
+    
+    return axis * angle
+
+
+leg_angle = 30
+smplx_cpose_param = torch.zeros(1, 165)
+smplx_cpose_param[:, 5] =  leg_angle / 180 * math.pi
+smplx_cpose_param[:, 8] = -leg_angle / 180 * math.pi
+oula_arm_l = euler_to_matrix(np.array([-90, 0, 0]) / 180 * np.pi, 'XYZ')
+axis_arm_l = matrix_to_axis_angle(oula_arm_l)
+
+smpl_cpose_param = torch.zeros(1, 72)
+smpl_cpose_param[:, 5] =  leg_angle / 180 * math.pi
+smpl_cpose_param[:, 8] = -leg_angle / 180 * math.pi
+
 
 
 def render_posmap(v_minimal, faces, uvs, faces_uvs, img_size=32):
@@ -100,10 +159,10 @@ def save_npz(data_path, res=128):
 
 
 if __name__ == '__main__':
-    smplx_parm_path = '' # path to the folder that include smpl params
+    smplx_parm_path = '../assets/test_pose' # path to the folder that include smpl params
     parms_name = 'smpl_parms.pth'
     uv_template_fn = '../assets/template_mesh_smpl_uv.obj'
-    assets_path = ''    # path to the folder that include 'assets'
+    assets_path = '../'    # path to the folder that include 'assets'
 
     print('saving obj...')
     save_obj(smplx_parm_path, parms_name)
