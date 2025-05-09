@@ -243,7 +243,8 @@ class AvatarModel:
                                             shuffle = True,
                                             num_workers = 4,
                                             worker_init_fn = worker_init_fn,
-                                            drop_last = True)
+                                            drop_last = True,
+                                            pin_memory=True)
 
     def getTestDataset(self,):
         self.test_dataset = MonoDataset_test(self.model_parms)

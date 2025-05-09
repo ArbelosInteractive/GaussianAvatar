@@ -65,7 +65,7 @@ class ModelParams(ParamGroup):
 
         # two stage training, stage one for pose optimization and stage two for adding dynamic appearances
         self.stage1_out_path =  ''
-        self.save_epoch = 30
+        self.save_epoch = 10
         self.train_stage = 1
 
         ########## here we need specific change ###############

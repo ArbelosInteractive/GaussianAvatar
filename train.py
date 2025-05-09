@@ -20,6 +20,9 @@ except ImportError:
     TENSORBOARD_FOUND = False
 
 def train(model, net, opt, saving_epochs, checkpoint_epochs):
+    print(f"[WARNING] Model starts saving at: {saving_epochs[0]} every: {model.save_epoch} afterwards")
+
+
     tb_writer = prepare_output_and_logger(model)
     avatarmodel = AvatarModel(model, net, opt, train=True)
     
@@ -40,12 +43,12 @@ def train(model, net, opt, saving_epochs, checkpoint_epochs):
 
     if model.train_stage == 2:
         avatarmodel.stage_load(model.stage1_out_path)
-    
-    progress_bar = tqdm(range(first_iter, data_length * opt.epochs), desc="Training progress")
-    ema_loss_for_log = 0.0
-    
-    for epoch in range(epoch_start + 1, opt.epochs + 1):
 
+    # progress_bar = tqdm(range(first_iter, data_length * opt.epochs), desc="Training progress")
+    epochs_bar = tqdm(range(epoch_start + 1, opt.epochs + 1), total=(opt.epochs + 1), desc="Epochs", colour="#6f03fc")
+    ema_loss_for_log = 0.0
+
+    for epoch in epochs_bar:
         if model.train_stage ==1:
             avatarmodel.net.train()
             avatarmodel.pose.train()
@@ -60,74 +63,77 @@ def train(model, net, opt, saving_epochs, checkpoint_epochs):
 
         wdecay_rgl = adjust_loss_weights(opt.lambda_rgl, epoch, mode='decay', start=epoch_start, every=20)
 
-        for _, batch_data in enumerate(train_loader):
+        with tqdm(enumerate(train_loader), total=data_length, desc=f"  └ (Epoch {epoch + 1}) Batch progress:", position=1, leave=False, colour="#fc8803") as batch_bar:
             
-            first_iter += 1
-            batch_data = to_cuda(batch_data, device=torch.device('cuda:0'))
-            gt_image = batch_data['original_image']
+            # with cProfile.Profile() as pr:
+            for i, batch_data in batch_bar:
+                first_iter += 1
+                batch_data = to_cuda(batch_data, device=torch.device('cuda:0'))
+                gt_image = batch_data['original_image']
 
-            if model.train_stage ==1:
-                image, points, offset_loss, geo_loss, scale_loss = avatarmodel.train_stage1(batch_data, first_iter)
-                scale_loss = opt.lambda_scale  * scale_loss
-                offset_loss = wdecay_rgl * offset_loss
-                
-                Ll1 = (1.0 - opt.lambda_dssim) * l1_loss_w(image, gt_image)
-                ssim_loss = opt.lambda_dssim * (1.0 - ssim(image, gt_image)) 
-
-                loss = scale_loss + offset_loss + Ll1 + ssim_loss + geo_loss
-            else:
-                image, points, pose_loss, offset_loss, = avatarmodel.train_stage2(batch_data, first_iter)
-
-                offset_loss = wdecay_rgl * offset_loss
-                
-                Ll1 = (1.0 - opt.lambda_dssim) * l1_loss_w(image, gt_image)
-                ssim_loss = opt.lambda_dssim * (1.0 - ssim(image, gt_image)) 
-
-                loss =  offset_loss + Ll1 + ssim_loss + pose_loss * 10
-
-
-            if epoch > opt.lpips_start_iter:
-                vgg_loss = opt.lambda_lpips * loss_fn_vgg((image-0.5)*2, (gt_image- 0.5)*2).mean()
-                loss = loss + vgg_loss
-            
-            avatarmodel.zero_grad(epoch)
-
-            loss.backward(retain_graph=True)
-            iter_end.record()
-            avatarmodel.step(epoch)
-
-            with torch.no_grad():
-                # Progress bar
-                ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
-                if first_iter % 10 == 0:
-                    progress_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}"})
-                    progress_bar.update(10)
-
-                if (first_iter-1) % opt.log_iter == 0:
-                    save_poitns = points.clone().detach().cpu().numpy()
-                    for i in range(save_poitns.shape[0]):
-                        pcd = o3d.geometry.PointCloud()
-                        pcd.points = o3d.utility.Vector3dVector(save_poitns[i])
-                        o3d.io.write_point_cloud(os.path.join(model.model_path, 'log',"pred_%d.ply" % i) , pcd)
-
-                    torchvision.utils.save_image(image, os.path.join(model.model_path, 'log', '{0:05d}_pred'.format(first_iter) + ".png"))
-                    torchvision.utils.save_image(gt_image, os.path.join(model.model_path, 'log', '{0:05d}_gt'.format(first_iter) + ".png"))
-                    
-            if tb_writer:
-                tb_writer.add_scalar('train_loss_patches/l1_loss', Ll1.item(), first_iter)
-                tb_writer.add_scalar('train_loss_patches/total_loss', loss.item(), first_iter)
-                tb_writer.add_scalar('train_loss_patches/scale_loss', scale_loss.item(), first_iter)
-                tb_writer.add_scalar('train_loss_patches/offset_loss', offset_loss.item(), first_iter)
-                # tb_writer.add_scalar('train_loss_patches/aiap_loss', aiap_loss.item(), first_iter)
-                tb_writer.add_scalar('iter_time', iter_start.elapsed_time(iter_end), first_iter)
                 if model.train_stage ==1:
-                    tb_writer.add_scalar('train_loss_patches/geo_loss', geo_loss.item(), first_iter)
-                else:
-                    tb_writer.add_scalar('train_loss_patches/pose_loss', pose_loss.item(), first_iter)
-                if epoch > opt.lpips_start_iter:
-                    tb_writer.add_scalar('train_loss_patches/vgg_loss', vgg_loss.item(), first_iter)
+                    image, points, offset_loss, geo_loss, scale_loss = avatarmodel.train_stage1(batch_data, first_iter)
+                    scale_loss = opt.lambda_scale  * scale_loss
+                    offset_loss = wdecay_rgl * offset_loss
+                    
+                    Ll1 = (1.0 - opt.lambda_dssim) * l1_loss_w(image, gt_image)
+                    ssim_loss = opt.lambda_dssim * (1.0 - ssim(image, gt_image)) 
 
-        if (epoch > saving_epochs[0]) and epoch % model.save_epoch == 0:
+                    loss = scale_loss + offset_loss + Ll1 + ssim_loss + geo_loss
+                else:
+                    image, points, pose_loss, offset_loss, = avatarmodel.train_stage2(batch_data, first_iter)
+
+                    offset_loss = wdecay_rgl * offset_loss
+                    
+                    Ll1 = (1.0 - opt.lambda_dssim) * l1_loss_w(image, gt_image)
+                    ssim_loss = opt.lambda_dssim * (1.0 - ssim(image, gt_image)) 
+
+                    loss =  offset_loss + Ll1 + ssim_loss + pose_loss * 10
+
+
+                if epoch > opt.lpips_start_iter:
+                    vgg_loss = opt.lambda_lpips * loss_fn_vgg((image-0.5)*2, (gt_image- 0.5)*2).mean()
+                    loss = loss + vgg_loss
+                
+                avatarmodel.zero_grad(epoch)
+
+                loss.backward(retain_graph=True)
+                iter_end.record()
+                avatarmodel.step(epoch)
+
+                with torch.no_grad():
+                    # Progress bar
+                    ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
+                    if first_iter % 10 == 0:
+                        epochs_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}"})
+                        # progress_bar.update(10)
+
+                    if (first_iter-1) % opt.log_iter == 0:
+                        save_poitns = points.clone().detach().cpu().numpy()
+                        for i in range(save_poitns.shape[0]):
+                            pcd = o3d.geometry.PointCloud()
+                            pcd.points = o3d.utility.Vector3dVector(save_poitns[i])
+                            o3d.io.write_point_cloud(os.path.join(model.model_path, 'log',"pred_%d.ply" % i) , pcd)
+
+                        torchvision.utils.save_image(image, os.path.join(model.model_path, 'log', '{0:05d}_pred'.format(first_iter) + ".png"))
+                        torchvision.utils.save_image(gt_image, os.path.join(model.model_path, 'log', '{0:05d}_gt'.format(first_iter) + ".png"))
+                        
+                if tb_writer:
+                    tb_writer.add_scalar('train_loss_patches/l1_loss', Ll1.item(), first_iter)
+                    tb_writer.add_scalar('train_loss_patches/total_loss', loss.item(), first_iter)
+                    tb_writer.add_scalar('train_loss_patches/scale_loss', scale_loss.item(), first_iter)
+                    tb_writer.add_scalar('train_loss_patches/offset_loss', offset_loss.item(), first_iter)
+                    # tb_writer.add_scalar('train_loss_patches/aiap_loss', aiap_loss.item(), first_iter)
+                    tb_writer.add_scalar('iter_time', iter_start.elapsed_time(iter_end), first_iter)
+                    if model.train_stage ==1:
+                        tb_writer.add_scalar('train_loss_patches/geo_loss', geo_loss.item(), first_iter)
+                    else:
+                        tb_writer.add_scalar('train_loss_patches/pose_loss', pose_loss.item(), first_iter)
+                    if epoch > opt.lpips_start_iter:
+                        tb_writer.add_scalar('train_loss_patches/vgg_loss', vgg_loss.item(), first_iter)
+
+
+        if (epoch >= saving_epochs[0]) and (epoch == saving_epochs[0] or epoch % model.save_epoch == 0):
             print("\n[Epoch {}] Saving Model".format(epoch))
             avatarmodel.save(epoch)
 
@@ -165,7 +171,7 @@ if __name__ == "__main__":
     np = NetworkParams(parser)
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
-    parser.add_argument("--save_epochs", nargs="+", type=int, default=[100])
+    parser.add_argument("--save_epochs", nargs="+", type=int, default=[20])
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_epochs", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
